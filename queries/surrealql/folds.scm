@@ -1,0 +1,15 @@
+[
+  (block)
+  (object)
+  (array)
+  (closure_body)
+  (argument_list)
+  (if_statement)
+  (for_statement)
+  (define_function_statement)
+  (define_table_statement)
+  (define_field_statement)
+  (define_event_statement)
+  (define_index_statement)
+  (define_analyzer_statement)
+] @fold

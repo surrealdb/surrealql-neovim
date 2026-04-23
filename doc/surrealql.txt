@@ -1,0 +1,97 @@
+*surrealql.txt*  Neovim plugin for SurrealQL
+
+==============================================================================
+CONTENTS                                               *surrealql-contents*
+
+  1. Introduction .................. |surrealql-introduction|
+  2. Requirements .................. |surrealql-requirements|
+  3. Installation .................. |surrealql-installation|
+  4. Configuration ................. |surrealql-configuration|
+  5. Features ...................... |surrealql-features|
+  6. Commands ...................... |surrealql-commands|
+
+==============================================================================
+1. INTRODUCTION                                     *surrealql-introduction*
+
+surrealql.nvim provides Neovim support for SurrealQL, the query language of
+SurrealDB. It integrates with nvim-treesitter using the official
+tree-sitter grammar from https://github.com/surrealdb/surrealql-tree-sitter.
+
+==============================================================================
+2. REQUIREMENTS                                     *surrealql-requirements*
+
+  - Neovim >= 0.9.0
+  - nvim-treesitter (https://github.com/nvim-treesitter/nvim-treesitter)
+    for syntax highlighting, indentation, and folding
+  - A C compiler (gcc/clang) for building the parser
+
+==============================================================================
+3. INSTALLATION                                     *surrealql-installation*
+
+Using lazy.nvim: >lua
+
+  {
+    "surrealdb/surrealql-neovim",
+    ft = { "surrealql" },
+    dependencies = { "nvim-treesitter/nvim-treesitter" },
+    opts = {},
+  }
+<
+After installation, install the parser inside Neovim: >
+
+  :TSInstall surrealql
+<
+==============================================================================
+4. CONFIGURATION                                   *surrealql-configuration*
+
+Call `require("surrealql").setup(opts)` with an optional config table.
+
+Default configuration: >lua
+
+  require("surrealql").setup({
+    treesitter = {
+      enable = true,
+      url = "https://github.com/surrealdb/surrealql-tree-sitter",
+      branch = "main",
+      files = { "src/parser.c", "src/scanner.c" },
+    },
+    filetype = {
+      commentstring = "-- %s",
+      tabstop = 2,
+      shiftwidth = 2,
+      expandtab = true,
+    },
+  })
+<
+==============================================================================
+5. FEATURES                                           *surrealql-features*
+
+  • Filetype detection for *.surql and *.surrealql files
+  • Syntax highlighting via tree-sitter
+    - Keywords, operators, string/number literals
+    - Variable parameters ($var)
+    - Built-in and custom function names
+    - Embedded JavaScript in FUNCTION bodies
+    - Datetimes, durations, types
+  • Smart indentation for blocks, objects, arrays
+  • Code folding for blocks, objects, arrays, statements
+  • Language injection: JavaScript inside scripting functions
+  • Scope tracking for LET variables and function definitions
+  • commentstring set to `-- %s` for `gc` / `gcc` motions
+
+==============================================================================
+6. COMMANDS                                           *surrealql-commands*
+
+Install the tree-sitter parser: >
+
+  :TSInstall surrealql
+<
+Update the parser: >
+
+  :TSUpdate surrealql
+<
+Verify parser is active for the current buffer: >
+
+  :TSBufInfo
+<
+vim:tw=78:ts=8:ft=help:norl:
