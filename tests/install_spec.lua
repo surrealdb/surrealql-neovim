@@ -80,11 +80,15 @@ describe("surrealql.install", function()
         cb({ code = 1, stderr = "connection refused" })
       end
 
+      local orig_schedule = vim.schedule
+      vim.schedule = function(f) f() end
+
       local result = nil
       install.install(function(ok) result = ok end)
 
       vim.fn.executable = orig_executable
       vim.system = orig_system
+      vim.schedule = orig_schedule
       assert.is_false(result)
     end)
   end)
