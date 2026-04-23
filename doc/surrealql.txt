@@ -8,7 +8,8 @@ CONTENTS                                               *surrealql-contents*
   3. Installation .................. |surrealql-installation|
   4. Configuration ................. |surrealql-configuration|
   5. Features ...................... |surrealql-features|
-  6. Commands ...................... |surrealql-commands|
+  6. LSP ........................... |surrealql-lsp|
+  7. Commands ...................... |surrealql-commands|
 
 ==============================================================================
 1. INTRODUCTION                                     *surrealql-introduction*
@@ -80,7 +81,43 @@ Default configuration: >lua
   • commentstring set to `-- %s` for `gc` / `gcc` motions
 
 ==============================================================================
-6. COMMANDS                                           *surrealql-commands*
+6. LSP                                                     *surrealql-lsp*
+
+LSP support uses the surrealql-language-server binary.
+Source: https://github.com/surrealdb/surrealql-language-server
+
+Enable and the plugin will download the correct binary automatically: >lua
+
+  require("surrealql").setup({
+    lsp = { enable = true },
+  })
+<
+To install the binary manually: >
+
+  :SurrealQLInstall
+<
+To disable auto-install (`auto_install = false`) and manage the binary
+yourself, set `cmd` to its location on your system.
+
+LSP is disabled by default (`enable = false`). When enabled, the server
+attaches automatically whenever a SurrealQL buffer is opened.
+
+Prebuilt binaries are available for Linux x86_64/arm64, macOS Apple Silicon,
+and Windows x86_64. macOS Intel falls back to `cargo install` if Rust is
+available.
+
+Capabilities provided by the server:
+  • Diagnostics
+  • Hover
+  • Completions
+  • Go-to definition and references
+  • Rename
+  • Code actions
+  • Signature help
+  • Call hierarchy
+
+==============================================================================
+7. COMMANDS                                           *surrealql-commands*
 
 Install the tree-sitter parser: >
 

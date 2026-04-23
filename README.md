@@ -11,6 +11,7 @@ Neovim plugin for [SurrealQL](https://surrealdb.com/docs/surrealql), powered by 
 - Code folding for blocks, objects, arrays, and statements
 - Scope tracking for `LET` variables, closure params, and function definitions
 - `commentstring` set to `-- %s` for `gc`/`gcc`
+- LSP integration via [surrealql-language-server](https://github.com/surrealdb/surrealql-language-server)
 
 ## Requirements
 
@@ -67,6 +68,13 @@ require("surrealql").setup({
     shiftwidth = 2,
     expandtab = true,
   },
+  lsp = {
+    enable = false,
+    auto_install = true,
+    cmd = { "surreal-language-server" },
+    on_attach = nil,
+    capabilities = nil,
+  },
 })
 ```
 
@@ -112,6 +120,42 @@ vim.opt.foldexpr = "nvim_treesitter#foldexpr()"
 | `BEGIN`, `COMMIT`, `CANCEL` | `@keyword.control` |
 | All other keywords | `@keyword` |
 | `=`, `!=`, `->`, `∈`, `⊂`, ... | `@operator` |
+
+## LSP
+
+The LSP integration uses the [surrealql-language-server](https://github.com/surrealdb/surrealql-language-server).
+
+Enable it in your setup and the plugin will automatically download the correct prebuilt binary for your platform:
+
+```lua
+require("surrealql").setup({
+  lsp = {
+    enable = true,
+  },
+})
+```
+
+To download the binary manually at any time, run `:SurrealQLInstall`.
+
+To disable auto-install and manage the binary yourself:
+
+```lua
+require("surrealql").setup({
+  lsp = {
+    enable = true,
+    auto_install = false,
+    cmd = { "surreal-language-server" },
+    on_attach = function(client, bufnr)
+      -- your keymaps here
+    end,
+    capabilities = require("cmp_nvim_lsp").default_capabilities(),
+  },
+})
+```
+
+Prebuilt binaries are available for Linux (x86_64, arm64), macOS (Apple Silicon), and Windows (x86_64). macOS Intel falls back to `cargo install surrealql-language-server` automatically if Rust is available.
+
+The server provides diagnostics, hover, completions, go-to-definition, references, rename, code actions, signature help, and call hierarchy.
 
 ## Grammar
 

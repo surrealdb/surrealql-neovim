@@ -13,6 +13,13 @@ M.defaults = {
     shiftwidth = 2,
     expandtab = true,
   },
+  lsp = {
+    enable = false,
+    auto_install = true,
+    cmd = { "surreal-language-server" },
+    on_attach = nil,
+    capabilities = nil,
+  },
 }
 
 return M

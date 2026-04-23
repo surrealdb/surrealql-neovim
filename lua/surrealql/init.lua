@@ -6,6 +6,7 @@ local _config = nil
 ---@class SurrealQLConfig
 ---@field treesitter? { enable?: boolean, url?: string, branch?: string, files?: string[] }
 ---@field filetype? { commentstring?: string, tabstop?: number, shiftwidth?: number, expandtab?: boolean }
+---@field lsp? { enable?: boolean, cmd?: string[], on_attach?: function, capabilities?: table }
 
 function M.get_config()
   return _config or defaults
@@ -18,6 +19,8 @@ function M.setup(opts)
   if _config.treesitter.enable then
     M._register_parser(_config.treesitter)
   end
+
+  require("surrealql.lsp").setup(_config.lsp)
 end
 
 function M._register_parser(ts_config)

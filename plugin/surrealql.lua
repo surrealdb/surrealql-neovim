@@ -15,3 +15,7 @@ vim.api.nvim_create_autocmd("User", {
     surrealql._register_parser(surrealql.get_config().treesitter)
   end,
 })
+
+vim.api.nvim_create_user_command("SurrealQLInstall", function()
+  require("surrealql.install").install()
+end, { desc = "Install the SurrealQL language server" })
