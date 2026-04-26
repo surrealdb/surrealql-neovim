@@ -16,8 +16,8 @@ Neovim plugin for [SurrealQL](https://surrealdb.com/docs/surrealql), powered by 
 ## Requirements
 
 - Neovim >= 0.9.0
-- [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter)
-- A C compiler (gcc or clang) for building the parser
+- [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter) (`main` branch — the rewrite. The legacy `master` branch is no longer supported.)
+- [`tree-sitter` CLI](https://tree-sitter.github.io/tree-sitter/cli/) on `$PATH` (used by nvim-treesitter to build the parser)
 
 ## Installation
 
@@ -59,8 +59,7 @@ require("surrealql").setup({
   treesitter = {
     enable = true,
     url = "https://github.com/surrealdb/surrealql-tree-sitter",
-    branch = "main",
-    files = { "src/parser.c", "src/scanner.c" },
+    revision = "eedb78175fd2b6a5a690473c7e0ac22664d7cd01",
   },
   filetype = {
     commentstring = "-- %s",
@@ -80,22 +79,21 @@ require("surrealql").setup({
 
 ## Enabling tree-sitter features
 
-After `:TSInstall surrealql`, enable features in your nvim-treesitter config:
+After `:TSInstall surrealql`, enable features via Neovim's native tree-sitter API:
 
 ```lua
-require("nvim-treesitter.configs").setup({
-  highlight = { enable = true },
-  indent = { enable = true },
-  fold = { enable = true },
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "surrealql",
+  callback = function()
+    vim.treesitter.start()
+    vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+    vim.wo.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+    vim.wo.foldmethod = "expr"
+  end,
 })
 ```
 
-For folding, also set:
-
-```lua
-vim.opt.foldmethod = "expr"
-vim.opt.foldexpr = "nvim_treesitter#foldexpr()"
-```
+Requires nvim-treesitter `main` branch (the rewrite). The legacy `master` branch is no longer supported.
 
 ## Highlighted constructs
 

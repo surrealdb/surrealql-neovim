@@ -22,6 +22,7 @@ describe("surrealql", function()
       local cfg = surrealql.get_config()
       assert.equals(4, cfg.filetype.tabstop)
       assert.equals(2, cfg.filetype.shiftwidth)
+      assert.equals(defaults.treesitter.revision, cfg.treesitter.revision)
     end)
 
     it("stores config accessible via get_config", function()
@@ -48,29 +49,24 @@ describe("surrealql", function()
     end)
 
     it("registers the parser when treesitter is present", function()
-      local parser_configs = {}
-      package.loaded["nvim-treesitter.parsers"] = {
-        get_parser_configs = function() return parser_configs end,
-      }
+      local parsers = {}
+      package.loaded["nvim-treesitter.parsers"] = parsers
 
       surrealql._register_parser(defaults.treesitter)
 
-      assert.is_not_nil(parser_configs.surrealql)
-      assert.equals("surrealql", parser_configs.surrealql.filetype)
-      assert.equals(defaults.treesitter.url, parser_configs.surrealql.install_info.url)
-      assert.equals(defaults.treesitter.branch, parser_configs.surrealql.install_info.branch)
+      assert.is_not_nil(parsers.surrealql)
+      assert.equals(defaults.treesitter.url, parsers.surrealql.install_info.url)
+      assert.equals(defaults.treesitter.revision, parsers.surrealql.install_info.revision)
     end)
 
     it("does not overwrite an existing registration", function()
-      local original = { filetype = "surrealql", install_info = { url = "original" } }
-      local parser_configs = { surrealql = original }
-      package.loaded["nvim-treesitter.parsers"] = {
-        get_parser_configs = function() return parser_configs end,
-      }
+      local original = { install_info = { url = "original" } }
+      local parsers = { surrealql = original }
+      package.loaded["nvim-treesitter.parsers"] = parsers
 
       surrealql._register_parser(defaults.treesitter)
 
-      assert.equals("original", parser_configs.surrealql.install_info.url)
+      assert.equals("original", parsers.surrealql.install_info.url)
     end)
   end)
 end)

@@ -4,7 +4,7 @@ local defaults = require("surrealql.config").defaults
 local _config = nil
 
 ---@class SurrealQLConfig
----@field treesitter? { enable?: boolean, url?: string, branch?: string, files?: string[] }
+---@field treesitter? { enable?: boolean, url?: string, revision?: string }
 ---@field filetype? { commentstring?: string, tabstop?: number, shiftwidth?: number, expandtab?: boolean }
 ---@field lsp? { enable?: boolean, cmd?: string[], on_attach?: function, capabilities?: table }
 
@@ -25,25 +25,21 @@ end
 
 function M._register_parser(ts_config)
   local ok, parsers = pcall(require, "nvim-treesitter.parsers")
-  if not ok then
+  if not ok or type(parsers) ~= "table" then
     return
   end
 
-  local parser_configs = parsers.get_parser_configs()
-  if parser_configs.surrealql then
+  if parsers.surrealql then
     return
   end
 
-  parser_configs.surrealql = {
+  parsers.surrealql = {
     install_info = {
       url = ts_config.url,
-      files = ts_config.files,
-      branch = ts_config.branch,
-      generate_requires_npm = false,
-      requires_generate_from_grammar = false,
+      revision = ts_config.revision,
     },
-    filetype = "surrealql",
     maintainers = { "@surrealdb" },
+    tier = 3,
   }
 end
 
