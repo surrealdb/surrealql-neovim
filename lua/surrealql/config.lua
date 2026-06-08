@@ -4,8 +4,8 @@ M.defaults = {
   treesitter = {
     enable = true,
     url = "https://github.com/surrealdb/surrealql-tree-sitter",
-    branch = "main",
-    files = { "src/parser.c", "src/scanner.c" },
+    -- Pinned for reproducibility. Bump in lockstep with queries/.
+    revision = "eedb78175fd2b6a5a690473c7e0ac22664d7cd01",
   },
   filetype = {
     commentstring = "-- %s",
