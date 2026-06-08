@@ -50,7 +50,7 @@ function M.setup(lsp_config)
   end
 
   vim.notify(
-    "[surrealql] surreal-language-server not found. Run :SurrealQLInstall or set lsp.auto_install = true.",
+    "[surrealql] surrealql-language-server not found. Run :SurrealQLInstall or set lsp.auto_install = true.",
     vim.log.levels.WARN
   )
 end

@@ -38,8 +38,8 @@ function M.is_installed()
   if vim.fn.executable(managed) == 1 then
     return true, managed
   end
-  if vim.fn.executable("surreal-language-server") == 1 then
-    return true, "surreal-language-server"
+  if vim.fn.executable("surrealql-language-server") == 1 then
+    return true, "surrealql-language-server"
   end
   return false, nil
 end
@@ -89,7 +89,7 @@ local function cargo_install(on_done)
     end
     vim.schedule(function()
       vim.notify("[surrealql] Language server installed via cargo.", vim.log.levels.INFO)
-      on_done(true, "surreal-language-server")
+      on_done(true, "surrealql-language-server")
     end)
   end)
 end
