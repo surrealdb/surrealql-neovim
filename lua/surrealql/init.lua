@@ -29,6 +29,13 @@ function M._register_parser(ts_config)
     return
   end
 
+  -- nvim-treesitter `main` removed get_parser_configs() in favour of a
+  -- different parser registry. Bail out cleanly instead of calling a nil
+  -- value, which previously errored at plugin load on the `main` branch.
+  if type(parsers.get_parser_configs) ~= "function" then
+    return
+  end
+
   local parser_configs = parsers.get_parser_configs()
   if parser_configs.surrealql then
     return
