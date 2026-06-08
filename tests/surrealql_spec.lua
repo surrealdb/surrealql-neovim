@@ -47,6 +47,14 @@ describe("surrealql", function()
       end)
     end)
 
+    it("does not error on nvim-treesitter main (no get_parser_configs)", function()
+      -- The `main` branch exposes the module but not get_parser_configs().
+      package.loaded["nvim-treesitter.parsers"] = {}
+      assert.has_no.errors(function()
+        surrealql._register_parser(defaults.treesitter)
+      end)
+    end)
+
     it("registers the parser when treesitter is present", function()
       local parser_configs = {}
       package.loaded["nvim-treesitter.parsers"] = {
