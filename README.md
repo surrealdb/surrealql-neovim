@@ -7,6 +7,7 @@ Neovim plugin for [SurrealQL](https://surrealdb.com/docs/surrealql), powered by 
 - Filetype detection for `.surql` and `.surrealql` files
 - Syntax highlighting via tree-sitter
 - Embedded JavaScript highlighting inside `FUNCTION() { ... }` scripting bodies
+- Embedded SurrealQL highlighting inside `surql`...`` tagged templates in JavaScript/TypeScript
 - Smart indentation for blocks, objects, arrays, and control flow
 - Code folding for blocks, objects, arrays, and statements
 - Scope tracking for `LET` variables, closure params, and function definitions
@@ -156,6 +157,26 @@ require("surrealql").setup({
 Prebuilt binaries are available for Linux (x86_64, arm64), macOS (Apple Silicon), and Windows (x86_64). macOS Intel falls back to `cargo install surrealql-language-server` automatically if Rust is available.
 
 The server provides diagnostics, hover, completions, go-to-definition, references, rename, code actions, signature help, and call hierarchy.
+
+## SurrealQL in JavaScript/TypeScript
+
+The surrealdb JavaScript/TypeScript SDK lets you write queries as tagged
+template literals. This plugin highlights their contents as SurrealQL:
+
+```ts
+const result = await db.query(surql`
+  SELECT name, age FROM user WHERE age > 18
+`);
+```
+
+Both `surql` and `surrealql` tags are recognized, whether called directly
+(`surql`...``) or as a member (`db.surql`...``), in `.ts`, `.tsx`, `.js`, and
+`.jsx` files.
+
+This requires the host `typescript` / `tsx` / `javascript` parsers to be
+installed (`:TSInstall typescript tsx javascript`). The injection queries use
+the `; extends` modeline, so they add to — rather than replace — any
+injections you already have.
 
 ## Grammar
 
