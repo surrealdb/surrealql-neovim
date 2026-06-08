@@ -4,7 +4,7 @@ M.defaults = {
   treesitter = {
     enable = true,
     url = "https://github.com/surrealdb/surrealql-tree-sitter",
-    branch = "main",
+    branch = "master",
     files = { "src/parser.c", "src/scanner.c" },
   },
   filetype = {
@@ -16,7 +16,7 @@ M.defaults = {
   lsp = {
     enable = false,
     auto_install = true,
-    cmd = { "surreal-language-server" },
+    cmd = { "surrealql-language-server" },
     on_attach = nil,
     capabilities = nil,
   },

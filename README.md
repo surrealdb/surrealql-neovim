@@ -60,7 +60,7 @@ require("surrealql").setup({
   treesitter = {
     enable = true,
     url = "https://github.com/surrealdb/surrealql-tree-sitter",
-    branch = "main",
+    branch = "master",
     files = { "src/parser.c", "src/scanner.c" },
   },
   filetype = {
@@ -72,7 +72,7 @@ require("surrealql").setup({
   lsp = {
     enable = false,
     auto_install = true,
-    cmd = { "surreal-language-server" },
+    cmd = { "surrealql-language-server" },
     on_attach = nil,
     capabilities = nil,
   },
@@ -145,7 +145,7 @@ require("surrealql").setup({
   lsp = {
     enable = true,
     auto_install = false,
-    cmd = { "surreal-language-server" },
+    cmd = { "surrealql-language-server" },
     on_attach = function(client, bufnr)
       -- your keymaps here
     end,

@@ -16,21 +16,21 @@ describe("surrealql.lsp", function()
   describe("setup", function()
     local function mock_install(installed)
       package.loaded["surrealql.install"] = {
-        is_installed = function() return installed, installed and "surreal-language-server" or nil end,
+        is_installed = function() return installed, installed and "surrealql-language-server" or nil end,
         install = function(cb) cb(false) end,
       }
     end
 
     it("does nothing when enable is false", function()
       mock_install(true)
-      lsp.setup({ enable = false, cmd = { "surreal-language-server" } })
+      lsp.setup({ enable = false, cmd = { "surrealql-language-server" } })
       local ok, _ = pcall(vim.api.nvim_get_autocmds, { group = "surrealql_lsp" })
       assert.is_false(ok)
     end)
 
     it("creates a FileType autocmd when binary is installed", function()
       mock_install(true)
-      lsp.setup({ enable = true, cmd = { "surreal-language-server" } })
+      lsp.setup({ enable = true, cmd = { "surrealql-language-server" } })
       local autocmds = vim.api.nvim_get_autocmds({ group = "surrealql_lsp", event = "FileType" })
       assert.equals(1, #autocmds)
       assert.equals("surrealql", autocmds[1].pattern)
@@ -38,8 +38,8 @@ describe("surrealql.lsp", function()
 
     it("replaces a previous autocmd group on repeated setup calls", function()
       mock_install(true)
-      lsp.setup({ enable = true, cmd = { "surreal-language-server" } })
-      lsp.setup({ enable = true, cmd = { "surreal-language-server" } })
+      lsp.setup({ enable = true, cmd = { "surrealql-language-server" } })
+      lsp.setup({ enable = true, cmd = { "surrealql-language-server" } })
       local autocmds = vim.api.nvim_get_autocmds({ group = "surrealql_lsp", event = "FileType" })
       assert.equals(1, #autocmds)
     end)
@@ -51,7 +51,7 @@ describe("surrealql.lsp", function()
         install = function(cb) installed_cb = cb end,
       }
 
-      lsp.setup({ enable = true, auto_install = true, cmd = { "surreal-language-server" } })
+      lsp.setup({ enable = true, auto_install = true, cmd = { "surrealql-language-server" } })
       assert.is_nil(vim.api.nvim_get_autocmds and (function()
         local ok, cmds = pcall(vim.api.nvim_get_autocmds, { group = "surrealql_lsp" })
         return ok and cmds[1] or nil
@@ -71,7 +71,7 @@ describe("surrealql.lsp", function()
       vim.notify = function(_, level)
         if level == vim.log.levels.WARN then warned = true end
       end
-      lsp.setup({ enable = true, auto_install = false, cmd = { "surreal-language-server" } })
+      lsp.setup({ enable = true, auto_install = false, cmd = { "surrealql-language-server" } })
       vim.notify = orig
       assert.is_true(warned)
     end)
@@ -83,12 +83,12 @@ describe("surrealql.lsp", function()
       local orig = vim.lsp.start
       vim.lsp.start = function(cfg) captured = cfg end
 
-      lsp.start({ cmd = { "surreal-language-server" } })
+      lsp.start({ cmd = { "surrealql-language-server" } })
 
       vim.lsp.start = orig
       assert.is_not_nil(captured)
       assert.equals("surrealql", captured.name)
-      assert.same({ "surreal-language-server" }, captured.cmd)
+      assert.same({ "surrealql-language-server" }, captured.cmd)
     end)
 
     it("passes on_attach and capabilities through", function()
@@ -98,7 +98,7 @@ describe("surrealql.lsp", function()
 
       local on_attach = function() end
       local caps = { textDocument = {} }
-      lsp.start({ cmd = { "surreal-language-server" }, on_attach = on_attach, capabilities = caps })
+      lsp.start({ cmd = { "surrealql-language-server" }, on_attach = on_attach, capabilities = caps })
 
       vim.lsp.start = orig
       assert.equals(on_attach, captured.on_attach)
@@ -110,7 +110,7 @@ describe("surrealql.lsp", function()
       local orig = vim.lsp.start
       vim.lsp.start = function(cfg) captured = cfg end
 
-      lsp.start({ cmd = { "surreal-language-server" } })
+      lsp.start({ cmd = { "surrealql-language-server" } })
 
       vim.lsp.start = orig
       assert.truthy(vim.tbl_contains(captured.filetypes, "surrealql"))
@@ -122,8 +122,8 @@ describe("surrealql.lsp", function()
       assert.is_false(defaults.enable)
     end)
 
-    it("default cmd is surreal-language-server", function()
-      assert.same({ "surreal-language-server" }, defaults.cmd)
+    it("default cmd is surrealql-language-server", function()
+      assert.same({ "surrealql-language-server" }, defaults.cmd)
     end)
   end)
 end)

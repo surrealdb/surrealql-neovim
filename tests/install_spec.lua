@@ -43,13 +43,13 @@ describe("surrealql.install", function()
       local orig = vim.fn.executable
       vim.fn.executable = function(p)
         if p == managed then return 0 end
-        if p == "surreal-language-server" then return 1 end
+        if p == "surrealql-language-server" then return 1 end
         return 0
       end
       local ok, bin = install.is_installed()
       vim.fn.executable = orig
       assert.is_true(ok)
-      assert.equals("surreal-language-server", bin)
+      assert.equals("surrealql-language-server", bin)
     end)
   end)
 
