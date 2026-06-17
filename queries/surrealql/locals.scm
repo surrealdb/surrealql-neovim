@@ -1,21 +1,55 @@
+; Locals / scopes for SurrealQL
+; Used by nvim-treesitter for incremental selection and scope-aware navigation.
+
+; ----------------------------------------------------------------------------
+; Scopes
+; ----------------------------------------------------------------------------
+; A `Block` is the body of a function, a closure, an IF branch and a FOR loop.
+; `ForStatement` and `IfElseStatement` are scopes themselves so their bound
+; variables (the loop var, branch-local bindings) stay local to them.
 [
-  (block)
-  (closure_body)
-  (if_statement)
-  (for_statement)
+  (Block)
+  (ForStatement)
+  (IfElseStatement)
 ] @local.scope
 
-(expressions
-  (keyword_let)
-  (variable_name) @local.definition)
+; ----------------------------------------------------------------------------
+; Definitions
+; ----------------------------------------------------------------------------
 
-(closure_param
-  (variable_name) @local.definition)
+; LET $x = ...            ->  (LetStatement (ParamDefinition (VariableName)))
+(LetStatement
+  (ParamDefinition
+    (VariableName) @local.definition.var))
 
-(variable_name) @local.reference
+; FOR $row IN ...         ->  loop variable (bare VariableName after FOR)
+(ForStatement
+  (Keyword) .
+  (VariableName) @local.definition.var)
 
-(define_function_statement
-  (custom_function_name) @local.definition)
+; DEFINE FUNCTION fn::name($p: T) -> T { ... }
+;   - the custom function name
+(DefineStatement
+  (FunctionName) @local.definition.function)
 
-(function_call
-  (custom_function_name) @local.reference)
+;   - its parameters
+(DefineStatement
+  (ParamDefinition
+    (VariableName) @local.definition.parameter))
+
+; Closure parameters       ->  |$x: int, $y| { ... }
+(Closure
+  (ParamDefinition
+    (VariableName) @local.definition.parameter))
+
+; ----------------------------------------------------------------------------
+; References
+; ----------------------------------------------------------------------------
+
+; every $param use
+(VariableName) @local.reference
+
+; custom function calls -> match a DEFINE FUNCTION definition
+((FunctionCall
+  (FunctionName) @local.reference)
+  (#match? @local.reference "^fn::"))

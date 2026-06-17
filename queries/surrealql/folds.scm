@@ -1,15 +1,34 @@
+; Folds for SurrealQL (PascalCase grammar)
+; Fold multi-line constructs: blocks, collection literals, subqueries,
+; and the larger statement nodes.
+
+; Container / value constructs
 [
-  (block)
-  (object)
-  (array)
-  (closure_body)
-  (argument_list)
-  (if_statement)
-  (for_statement)
-  (define_function_statement)
-  (define_table_statement)
-  (define_field_statement)
-  (define_event_statement)
-  (define_index_statement)
-  (define_analyzer_statement)
+  (Block)
+  (Object)
+  (Array)
+  (Set)
+  (SubQuery)
+  (Closure)
+] @fold
+
+; Statements
+[
+  (SelectStatement)
+  (CreateStatement)
+  (InsertStatement)
+  (UpdateStatement)
+  (UpsertStatement)
+  (DeleteStatement)
+  (RelateStatement)
+  (DefineStatement)
+  (AlterStatement)
+  (RemoveStatement)
+  (RebuildStatement)
+  (LetStatement)
+  (ReturnStatement)
+  (IfElseStatement)
+  (ForStatement)
+  (InfoForStatement)
+  (LiveSelectStatement)
 ] @fold

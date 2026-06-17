@@ -1,354 +1,168 @@
-(comment) @comment @spell
+; SurrealQL highlights (PascalCase grammar)
+;
+; nvim 0.12 precedence/predicate notes:
+;   - When several patterns capture the same node, the one that appears LATER
+;     in this file wins. So generic catch-alls go FIRST and specific overrides
+;     go LAST.
+;   - #match? uses Vim regex: use \c for case-insensitivity, NOT (?i).
+;   - #eq? / #any-of? are case-sensitive (enumerate both cases if used).
 
-(string) @string
-(prefixed_string) @string
+; ---------------------------------------------------------------------------
+; Comments
+; ---------------------------------------------------------------------------
+(Comment) @comment @spell
+(BlockComment) @comment @spell
 
-(int) @number
-(float) @number.float
-(decimal) @number.float
+; ---------------------------------------------------------------------------
+; Strings / regex
+; ---------------------------------------------------------------------------
+(String) @string
+(FormatString) @string
+(Regex) @string.regexp
 
-(datetime) @string.special
-(duration) @string.special
+; embedded JavaScript body of FUNCTION() { ... }
+(JavaScriptBlock) @embedded
+
+; ---------------------------------------------------------------------------
+; Numbers
+; ---------------------------------------------------------------------------
+(Number (Int) @number)
+(Number (Float) @number.float)
+(Number (Decimal) @number.float)
+(VersionNumber) @number
+
+; datetimes collapse to (String); durations are their own node
+(Duration) @string.special
+(DurationValue) @string.special
+
+; ---------------------------------------------------------------------------
+; Literals / constants
+; ---------------------------------------------------------------------------
+(Bool) @boolean
+(None) @constant.builtin
+(Any) @character.special
+
+; ---------------------------------------------------------------------------
+; Variables / parameters  ($name and binding sites)
+; ---------------------------------------------------------------------------
+(VariableName) @variable.parameter
+(ParamDefinition (VariableName) @variable.parameter)
+
+; ---------------------------------------------------------------------------
+; Types
+; ---------------------------------------------------------------------------
+(TypeName) @type
+
+; ---------------------------------------------------------------------------
+; Identifiers / fields / properties
+; ---------------------------------------------------------------------------
+(Ident) @variable.member
+(Idiom (Ident) @variable.member)
+(KeyName) @property
+
+; record ids:  table : id
+(RecordTbIdent) @type
+(RecordIdIdent) @string.special
+
+; ---------------------------------------------------------------------------
+; Functions  (custom fn::...  -> @function ; everything else -> @function.builtin)
+; ---------------------------------------------------------------------------
+((FunctionName) @function.builtin
+  (#not-match? @function.builtin "^fn::"))
+((FunctionName) @function
+  (#match? @function "^fn::"))
+
+; ---------------------------------------------------------------------------
+; Punctuation
+; ---------------------------------------------------------------------------
+[
+  (BraceOpen)
+  (BraceClose)
+] @punctuation.bracket
 
 [
-  (keyword_true)
-  (keyword_false)
-] @boolean
+  "(" ")"
+  "[" "]"
+  "<|" "|>"
+] @punctuation.bracket
+
+(Colon) @punctuation.delimiter
+(Pipe) @punctuation.delimiter
+[
+  ","
+  ";"
+  "."
+  "|"
+] @punctuation.delimiter
 
 [
-  (keyword_null)
-  (keyword_none)
-] @constant.builtin
+  "@"
+  "@@"
+] @punctuation.special
+(At) @punctuation.special
 
-(variable_name) @variable.parameter
+; ---------------------------------------------------------------------------
+; Operators
+; ---------------------------------------------------------------------------
+(Operator) @operator
+(RangeOp) @operator
 
-(type_name) @type
-(composite_type) @type
-
-(function_call
-  (builtin_function_name) @function.builtin)
-
-(function_call
-  (custom_function_name) @function)
-
-(function_call
-  (function_name) @function)
-
-(scripting_function
-  (keyword_function) @keyword.function)
-
-(scripting_function
-  (keyword_async) @keyword.coroutine)
-
-(define_function_statement
-  (keyword_function) @keyword.function)
-
-(scripting_function
-  (js_function_body) @embedded)
-
-(binary_operator) @operator
-(assignment_operator) @operator
-
+; graph arrows  -> <- <->
 [
-  "="
-  "=="
-  "!="
-  "!~"
-  "<"
-  "<="
-  ">"
-  ">="
-  "+"
-  "-"
-  "*"
-  "**"
-  "/"
-  "%"
-  "&&"
-  "||"
-  "??"
-  "?:"
-  "?="
-  "*="
-  "*~"
-  "<~"
-  "+="
-  "-="
-  "->"
-  "<-"
-  "<->"
-  "∈"
-  "∉"
-  "∋"
-  "∌"
-  "⊂"
-  "⊃"
-  "⊄"
-  "⊅"
-  "⊆"
-  "⊇"
-  "×"
-  "÷"
+  (LookupLeft)
+  (LookupRight)
+  (LookupBoth)
 ] @operator
 
-["{" "}"] @punctuation.bracket
-["[" "]"] @punctuation.bracket
-["(" ")"] @punctuation.bracket
-["<|" "|>"] @punctuation.bracket
-
-["," ";"] @punctuation.delimiter
-[":" "::"] @punctuation.delimiter
-[".." "." "?."] @punctuation.delimiter
-["@" "@@"] @punctuation.special
-["?" "!"] @punctuation.special
-["|"] @punctuation.delimiter
-
+; symbolic / unicode operators that may surface as anonymous tokens
 [
-  (keyword_if)
-  (keyword_else)
-  (keyword_then)
-  (keyword_when)
-  (keyword_end)
-] @keyword.conditional
+  "!=" "!~"
+  "&&" "||"
+  "==" "="
+  "<" "<=" "<~"
+  ">" ">="
+  "+" "+=" "-" "-="
+  "*" "**" "*=" "*~"
+  "??" "?:" "?="
+  "~"
+  "×" "÷"
+  "∈" "∉" "∋" "∌"
+  "⊂" "⊃" "⊄" "⊅" "⊆" "⊇"
+] @operator
 
-[
-  (keyword_for)
-  (keyword_break)
-  (keyword_continue)
-] @keyword.repeat
+; word operators are (Operator) nodes (AND, OR, CONTAINS, ...): recolor them.
+; (placed AFTER (Operator) @operator so this override wins)
+((Operator) @keyword.operator
+  (#match? @keyword.operator "\\c^(and|or|not|is|in|inside|outside|intersects|contains|containsall|containsany|containsnone|containsnot|allinside|anyinside|noneinside)$"))
 
-[
-  (keyword_return)
-  (keyword_throw)
-] @keyword.return
+; ---------------------------------------------------------------------------
+; Keywords
+;
+; There is a single generic (Keyword) node; roles are selected by text.
+; Generic catch-all FIRST, role overrides LAST (later wins in nvim).
+; ---------------------------------------------------------------------------
+(Keyword) @keyword
 
-[
-  (keyword_begin)
-  (keyword_commit)
-  (keyword_cancel)
-  (keyword_transaction)
-] @keyword.control
+; conditionals: IF ELSE THEN END WHEN
+((Keyword) @keyword.conditional
+  (#match? @keyword.conditional "\\c^(if|else|then|end|when)$"))
 
-[
-  (keyword_and)
-  (keyword_or)
-  (keyword_not)
-  (keyword_is)
-  (keyword_in)
-  (keyword_inside)
-  (keyword_not_inside)
-  (keyword_all_inside)
-  (keyword_any_inside)
-  (keyword_none_inside)
-  (keyword_outside)
-  (keyword_intersects)
-  (keyword_contains)
-  (keyword_contains_not)
-  (keyword_contains_all)
-  (keyword_contains_any)
-  (keyword_contains_none)
-] @keyword.operator
+; loops / iteration: FOR BREAK CONTINUE
+((Keyword) @keyword.repeat
+  (#match? @keyword.repeat "\\c^(for|break|continue)$"))
 
-[
-  (keyword_select)
-  (keyword_insert)
-  (keyword_update)
-  (keyword_upsert)
-  (keyword_delete)
-  (keyword_create)
-  (keyword_relate)
-  (keyword_live)
-] @keyword
+; return / throw
+((Keyword) @keyword.return
+  (#match? @keyword.return "\\c^(return|throw)$"))
 
-[
-  (keyword_from)
-  (keyword_where)
-  (keyword_order)
-  (keyword_group)
-  (keyword_limit)
-  (keyword_split)
-  (keyword_fetch)
-  (keyword_start)
-  (keyword_explain)
-  (keyword_parallel)
-  (keyword_timeout)
-  (keyword_with)
-  (keyword_index)
-  (keyword_omit)
-  (keyword_only)
-  (keyword_value)
-  (keyword_values)
-  (keyword_into)
-  (keyword_content)
-  (keyword_merge)
-  (keyword_patch)
-  (keyword_replace)
-  (keyword_set)
-  (keyword_unset)
-  (keyword_diff)
-  (keyword_full)
-  (keyword_by)
-  (keyword_as)
-  (keyword_let)
-  (keyword_show)
-  (keyword_changes)
-  (keyword_since)
-  (keyword_version)
-] @keyword
+; transaction control: BEGIN COMMIT CANCEL TRANSACTION
+((Keyword) @keyword.control
+  (#match? @keyword.control "\\c^(begin|commit|cancel|transaction)$"))
 
-[
-  (keyword_define)
-  (keyword_remove)
-  (keyword_alter)
-  (keyword_use)
-  (keyword_overwrite)
-  (keyword_if_exists)
-] @keyword
+; word operators that are tokenized as keywords (IN, CONTAINS, ...)
+((Keyword) @keyword.operator
+  (#match? @keyword.operator "\\c^(and|or|not|is|in|inside|outside|intersects|contains|containsall|containsany|containsnone|containsnot|allinside|anyinside|noneinside)$"))
 
-[
-  (keyword_namespace)
-  (keyword_database)
-  (keyword_table)
-  (keyword_event)
-  (keyword_field)
-  (keyword_index)
-  (keyword_analyzer)
-  (keyword_token)
-  (keyword_scope)
-  (keyword_user)
-  (keyword_param)
-  (keyword_access)
-  (keyword_sequence)
-  (keyword_module)
-  (keyword_api)
-  (keyword_bucket)
-  (keyword_config)
-] @keyword
-
-[
-  (keyword_ns)
-  (keyword_db)
-  (keyword_info)
-] @keyword
-
-[
-  (keyword_type)
-  (keyword_flexible)
-  (keyword_readonly)
-  (keyword_schemafull)
-  (keyword_schemaless)
-  (keyword_drop)
-  (keyword_permissions)
-  (keyword_default)
-  (keyword_assert)
-  (keyword_comment)
-  (keyword_changefeed)
-  (keyword_unique)
-  (keyword_search)
-  (keyword_relation)
-  (keyword_normal)
-  (keyword_any)
-  (keyword_computed)
-  (keyword_reference)
-] @keyword.modifier
-
-[
-  (keyword_on)
-  (keyword_at)
-  (keyword_to)
-  (keyword_out)
-  (keyword_before)
-  (keyword_after)
-  (keyword_for)
-  (keyword_ignore)
-  (keyword_cascade)
-  (keyword_reject)
-] @keyword
-
-[
-  (keyword_root)
-  (keyword_roles)
-  (keyword_session)
-  (keyword_signin)
-  (keyword_signup)
-  (keyword_bearer)
-  (keyword_jwt)
-  (keyword_jwks)
-  (keyword_authenticate)
-] @keyword
-
-[
-  (keyword_grant)
-  (keyword_revoke)
-  (keyword_revoked)
-  (keyword_purge)
-  (keyword_expired)
-  (keyword_batch)
-] @keyword
-
-[
-  (keyword_eddsa)
-  (keyword_es256)
-  (keyword_es384)
-  (keyword_es512)
-  (keyword_ps256)
-  (keyword_ps384)
-  (keyword_ps512)
-  (keyword_rs256)
-  (keyword_rs384)
-  (keyword_rs512)
-  (keyword_hs256)
-  (keyword_hs384)
-  (keyword_hs512)
-] @string.special
-
-[
-  (keyword_bm25)
-  (keyword_euclidean)
-  (keyword_cosine)
-  (keyword_hamming)
-  (keyword_jaccard)
-  (keyword_manhattan)
-  (keyword_minkowski)
-  (keyword_pearson)
-  (keyword_chebyshev)
-] @string.special
-
-[
-  (keyword_end)
-  (keyword_async)
-  (keyword_all)
-  (keyword_sequence)
-  (keyword_reference)
-  (keyword_computed)
-  (keyword_return)
-] @keyword
-
-(reference_on_delete_clause
-  (keyword_on) @keyword
-  (keyword_delete) @keyword)
-
-(reference_on_delete_clause
-  [
-    (keyword_ignore)
-    (keyword_unset)
-    (keyword_cascade)
-    (keyword_reject)
-  ] @keyword)
-
-(reference_on_delete_clause
-  (keyword_then) @keyword.conditional)
-
-(assert_clause
-  (keyword_assert) @keyword.modifier)
-
-(access_statement
-  [
-    (keyword_grant)
-    (keyword_show)
-    (keyword_revoke)
-    (keyword_purge)
-  ] @keyword)
-
-(define_sequence_statement
-  (keyword_sequence) @keyword)
+; modifiers / qualifiers
+((Keyword) @keyword.modifier
+  (#match? @keyword.modifier "\\c^(type|flexible|readonly|schemafull|schemaless|drop|permissions|default|assert|comment|changefeed|unique|search|relation|normal|computed|reference)$"))
