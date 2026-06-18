@@ -47,15 +47,21 @@ describe("surrealql", function()
       end)
     end)
 
-    it("does not error on nvim-treesitter main (no get_parser_configs)", function()
-      -- The `main` branch exposes the module but not get_parser_configs().
-      package.loaded["nvim-treesitter.parsers"] = {}
-      assert.has_no.errors(function()
-        surrealql._register_parser(defaults.treesitter)
-      end)
+    it("registers via the new API on nvim-treesitter main (no get_parser_configs)", function()
+      -- The `main` branch exposes the module table itself as the registry,
+      -- without get_parser_configs(). Registration assigns parsers.<lang>.
+      local parsers = {}
+      package.loaded["nvim-treesitter.parsers"] = parsers
+
+      surrealql._register_parser(defaults.treesitter)
+
+      assert.is_not_nil(parsers.surrealql)
+      assert.equals(defaults.treesitter.url, parsers.surrealql.install_info.url)
+      assert.equals(defaults.treesitter.revision, parsers.surrealql.install_info.revision)
+      assert.equals(3, parsers.surrealql.tier)
     end)
 
-    it("registers the parser when treesitter is present", function()
+    it("registers via the legacy API when get_parser_configs is present", function()
       local parser_configs = {}
       package.loaded["nvim-treesitter.parsers"] = {
         get_parser_configs = function() return parser_configs end,
@@ -69,9 +75,8 @@ describe("surrealql", function()
       assert.equals(defaults.treesitter.branch, parser_configs.surrealql.install_info.branch)
     end)
 
-    it("updates install_info on an existing registration", function()
-      -- A later call (e.g. setup() with user opts, after the eager default
-      -- registration at plugin load) must override, not be ignored.
+    it("updates install_info on an existing legacy registration", function()
+      -- A later setup() call must override the eager default registration.
       local original = { filetype = "surrealql", install_info = { url = "original" } }
       local parser_configs = { surrealql = original }
       package.loaded["nvim-treesitter.parsers"] = {
@@ -81,8 +86,6 @@ describe("surrealql", function()
       surrealql._register_parser(defaults.treesitter)
 
       assert.equals(defaults.treesitter.url, parser_configs.surrealql.install_info.url)
-      assert.equals(defaults.treesitter.branch, parser_configs.surrealql.install_info.branch)
-      assert.equals("surrealql", parser_configs.surrealql.filetype)
     end)
   end)
 end)

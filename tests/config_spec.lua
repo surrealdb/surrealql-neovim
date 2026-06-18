@@ -10,6 +10,7 @@ describe("surrealql.config", function()
     assert.is_true(config.defaults.treesitter.enable)
     assert.equals("https://github.com/surrealdb/surrealql-tree-sitter", config.defaults.treesitter.url)
     assert.equals("master", config.defaults.treesitter.branch)
+    assert.equals("master", config.defaults.treesitter.revision)
     assert.same({ "src/parser.c", "src/scanner.c" }, config.defaults.treesitter.files)
   end)
 

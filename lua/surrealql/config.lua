@@ -4,7 +4,8 @@ M.defaults = {
   treesitter = {
     enable = true,
     url = "https://github.com/surrealdb/surrealql-tree-sitter",
-    branch = "master",
+    branch = "master", -- nvim-treesitter `master` (legacy) API
+    revision = "master", -- nvim-treesitter `main` API: track the grammar's master branch
     files = { "src/parser.c", "src/scanner.c" },
   },
   filetype = {

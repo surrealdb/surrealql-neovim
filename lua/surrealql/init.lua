@@ -4,7 +4,7 @@ local defaults = require("surrealql.config").defaults
 local _config = nil
 
 ---@class SurrealQLConfig
----@field treesitter? { enable?: boolean, url?: string, branch?: string, files?: string[] }
+---@field treesitter? { enable?: boolean, url?: string, branch?: string, revision?: string, files?: string[] }
 ---@field filetype? { commentstring?: string, tabstop?: number, shiftwidth?: number, expandtab?: boolean }
 ---@field lsp? { enable?: boolean, cmd?: string[], on_attach?: function, capabilities?: table }
 
@@ -25,34 +25,40 @@ end
 
 function M._register_parser(ts_config)
   local ok, parsers = pcall(require, "nvim-treesitter.parsers")
-  if not ok then
+  if not ok or type(parsers) ~= "table" then
     return
   end
 
-  -- nvim-treesitter `main` removed get_parser_configs() in favour of a
-  -- different parser registry. Bail out cleanly instead of calling a nil
-  -- value, which previously errored at plugin load on the `main` branch.
-  if type(parsers.get_parser_configs) ~= "function" then
-    return
+  if type(parsers.get_parser_configs) == "function" then
+    -- Legacy nvim-treesitter (`master` branch): parser configs live behind
+    -- get_parser_configs(). Update an existing entry rather than bailing so
+    -- a later setup() can override the eager default registration.
+    local configs = parsers.get_parser_configs()
+    configs.surrealql = vim.tbl_deep_extend("force", configs.surrealql or {}, {
+      install_info = {
+        url = ts_config.url,
+        branch = ts_config.branch,
+        files = ts_config.files,
+        generate_requires_npm = false,
+        requires_generate_from_grammar = false,
+      },
+      filetype = "surrealql",
+      maintainers = { "@surrealdb" },
+    })
+  else
+    -- New nvim-treesitter (`main` branch): the module itself is the parser
+    -- registry, indexed by language. `revision` is the git ref it fetches
+    -- (`<url>/archive/<revision>.tar.gz`), so it tracks the grammar's
+    -- `master` branch — matching the queries this plugin ships. `tier = 3`
+    -- keeps surrealql out of `:TSInstall all` unless requested by name.
+    parsers.surrealql = vim.tbl_deep_extend("force", parsers.surrealql or {}, {
+      install_info = {
+        url = ts_config.url,
+        revision = ts_config.revision,
+      },
+      tier = 3,
+    })
   end
-
-  local parser_configs = parsers.get_parser_configs()
-
-  -- Update `install_info` on an existing entry rather than bailing out.
-  -- The plugin eager-registers at load with defaults (before `setup()`),
-  -- so returning early when an entry already existed made
-  -- `setup({ treesitter = ... })` a silent no-op. Every caller passes the
-  -- live config, so the post-`setup()` merged config correctly wins.
-  local entry = parser_configs.surrealql
-    or { filetype = "surrealql", maintainers = { "@surrealdb" } }
-  entry.install_info = {
-    url = ts_config.url,
-    files = ts_config.files,
-    branch = ts_config.branch,
-    generate_requires_npm = false,
-    requires_generate_from_grammar = false,
-  }
-  parser_configs.surrealql = entry
 end
 
 return M
